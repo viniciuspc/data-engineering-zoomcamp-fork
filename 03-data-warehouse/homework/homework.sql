@@ -27,3 +27,25 @@ SELECT PULocationID, DOLocationID FROM de-zoo.nytaxi.yellow_tripdata_non_partito
 -- Question 4
 -- 8.333
 SELECT count(1) FROM de-zoo.nytaxi.external_yellow_tripdata WHERE fare_amount = 0;
+
+-- Question 5
+CREATE TABLE de-zoo.nytaxi.yellow_tripdata_optimized_table
+PARTITION BY DATE(tpep_dropoff_datetime)
+CLUSTER BY VendorID AS
+SELECT * FROM de-zoo.nytaxi.external_yellow_tripdata;
+
+-- Question 6
+-- 310.24MB
+SELECT DISTINCT(VendorID)
+  FROM de-zoo.nytaxi.yellow_tripdata_non_partitoned
+  WHERE DATE(tpep_dropoff_datetime)  BETWEEN '2024-03-01' AND '2024-03-15'
+;
+-- 26.84MB
+SELECT DISTINCT(VendorID)
+  FROM de-zoo.nytaxi.yellow_tripdata_optimized_table
+  WHERE DATE(tpep_dropoff_datetime)  BETWEEN '2024-03-01' AND '2024-03-15'
+;
+
+-- Bonus
+-- 0 B. BigQuery stores precomputed results, for simple aggreagation queries (like COUNT(*)), BigQuery does not need to scan the underlying data, leading to 0 bytes processed. 
+SELECT COUNT(*) FROM de-zoo.nytaxi.yellow_tripdata_non_partitoned;
